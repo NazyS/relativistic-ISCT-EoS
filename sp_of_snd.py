@@ -36,7 +36,7 @@ filepath = 'cs_sq_fulldata_{}_b_{}_{}_g_{}_R_{}_mu_{}_.csv'.format(particle_type
 
 eos = Relativistic_ISCT(m=m, g=g, eos=label, R=R, b=b)
 
-Tdata = np.linspace(5., 100., 2)
+Tdata = np.linspace(5., 3000., 100)
 pdata = []
 Sigmadata = []
 Kdata = []
