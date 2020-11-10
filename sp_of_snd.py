@@ -44,7 +44,7 @@ entropydata = []
 densitydata = []
 cs_sq_data = []
 
-mu = [0.]
+mu = [mu]
 
 for T in Tdata:
     print('calculating for T: ',T)
