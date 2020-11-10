@@ -3,3 +3,4 @@ v_eff_ISCT
 __pycache__/
 .ipynb*
 slurm*
+cs_sq_fulldata
