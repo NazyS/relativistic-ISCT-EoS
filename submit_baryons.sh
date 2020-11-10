@@ -18,18 +18,18 @@ for label in "${labels[@]}"; do
 
             for mu in ${mu_array[@]}; do
 
-            echo Submitting baryons ${label} g: ${g} mu: ${mu} b: ${b}
-            sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
-            sleep 1
+                echo Submitting baryons ${label} g: ${g} mu: ${mu} b: ${b}
+                sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
+                sleep 1
 
             done
         done
 
         for g in ${g_array2[@]}; do
 
-        echo Submitting baryons ${label} g: ${g} mu: ${mu_array[0]} b: ${b}
-        sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu_array[0]} ${b} ${R}
-        sleep 1
+            echo Submitting baryons ${label} g: ${g} mu: ${mu_array[0]} b: ${b}
+            sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu_array[0]} ${b} ${R}
+            sleep 1
 
         done
     done
