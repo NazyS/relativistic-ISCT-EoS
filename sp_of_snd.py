@@ -1,8 +1,7 @@
-from functools import partial
 import numpy as np
 import pandas as pd
 
-from Relativistic_ISCT import Relativistic_ISCT
+from eos.relativistic_ISCT import Relativistic_ISCT
 
 import os
 import sys
