@@ -1,5 +1,6 @@
 C_s calc_f(p)_stitching
 v_eff_ISCT
+notes
 __pycache__/
 .ipynb*
 slurm*
