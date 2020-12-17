@@ -43,10 +43,12 @@ class Eq_of_state:
         return root[0] if format == 'p only' else root
 
     # entropy density
+    @lru_cache(maxsize=512)
     def entropy(self, T, *mu, **kwargs):
         return partial_derivative(self.p_eq, 0, [T, *mu], **kwargs)
 
     # baryon density of a single component
+    @lru_cache(maxsize=512)
     def density_baryon_comp(self, comp, T, *mu, **kwargs):
         return partial_derivative(self.p_eq, 1+comp, [T, *mu], **kwargs)
 
