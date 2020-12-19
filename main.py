@@ -144,3 +144,12 @@ class Eq_of_state:
         denum = partial_derivative(self.energy, 0, [T, *mu], **kwargs) - \
             deriv_by_sigma_with_const_T(self.energy, T, *mu)*sigma_deriv
         return num/denum
+
+
+def get_changable_dx(T):
+    if T<100.:
+        return 1e-3
+    elif T<500.:
+        return 1e-1
+    else:
+        return 1.

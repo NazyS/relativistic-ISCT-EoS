@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from eos.relativistic_ISCT import Relativistic_ISCT
+from main import get_changable_dx
 
 import os
 import sys
@@ -35,7 +36,7 @@ filepath = 'cs_sq_fulldata_{}_b_{}_{}_g_{}_R_{}_mu_{}_.csv'.format(particle_type
 
 eos = Relativistic_ISCT(m=m, g=g, eos=label, R=R, b=b)
 
-Tdata = np.linspace(5., 3000., 100)
+Tdata = np.linspace(0.01, 3000., 200)
 pdata = []
 Sigmadata = []
 Kdata = []
@@ -53,9 +54,9 @@ for T in Tdata:
     pdata.append(p)
     Sigmadata.append(Sigma)
     Kdata.append(K)
-    entropydata.append(eos.entropy(T, *mu))
-    densitydata.append(eos.density_baryon(T, *mu))
-    cs_sq_data.append(eos.speed_of_s_sq(T, *mu))
+    entropydata.append(eos.entropy(T, *mu, dx=get_changable_dx(T)))
+    densitydata.append(eos.density_baryon(T, *mu, dx=get_changable_dx(T)))
+    cs_sq_data.append(eos.speed_of_s_sq(T, *mu, dx=get_changable_dx(T)))
 
 df = pd.DataFrame({
     'T':Tdata,
