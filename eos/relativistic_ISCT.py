@@ -6,7 +6,7 @@ from main import Eq_of_state, hbar
 
 
 class Relativistic_ISCT(Eq_of_state):
-    def __init__(self, alpha=1., beta=1., m=940., R=0.5, g=3., alpha_p=1., beta_p=1., a=0.775, b=1., eos=None, components=1):
+    def __init__(self, alpha=1., beta=1., m=940., R=0.5, g=4., alpha_p=1., beta_p=1., a=0.775, b=1., eos=None, components=1):
         self.num_of_components = components
         self.m = self.make_parameter_array(m)
         self.R = self.make_parameter_array(R)
@@ -87,7 +87,7 @@ class Relativistic_ISCT(Eq_of_state):
         jacobian = self.m[comp] * np.pi/4. * (1 + np.tan(np.pi/4.*(x+1.))**2.)
         return 4*np.pi*self.g[comp]/(2*np.pi*hbar)**3 * k**2*np.exp(-np.sqrt(self.m[comp]**2+k**2)/T) * jacobian
 
-    # one-component pressure (antibaryons included as separate component)
+    # one-component pressure (antibaryons included here as separate component automatically)
     def pPart(self, comp, T, mu, p, Sigma, K):
 
         def main_part(comp, x, theta):
@@ -98,7 +98,7 @@ class Relativistic_ISCT(Eq_of_state):
             return integrate.quadrature(lambda theta: self.momentum_part(comp, x, T)*main_part(comp, x, theta)*np.sin(theta), 0., np.pi/2.)[0]
         return integrate.quad(int_func, -1., 1.)[0]
 
-    # one-component Induced Surface Tension (antibaryons included as separate component)
+    # one-component Induced Surface Tension (antibaryons included here as separate component automatically)
     def SigmaPart(self, comp, T, mu, p, Sigma, K):
 
         def main_part(comp, x, theta):
@@ -110,7 +110,7 @@ class Relativistic_ISCT(Eq_of_state):
 
         return integrate.quad(int_func, -1., 1.)[0]
 
-    # one-component Induced Curvature Tension (antibaryons included as separate component)
+    # one-component Induced Curvature Tension (antibaryons included here as separate component automatically)
     def KPart(self, comp, T, mu, p, Sigma, K):
 
         def main_part(comp, x, theta):
