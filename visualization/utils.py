@@ -17,17 +17,41 @@ def clean_outliers_and_mask(df, threshold=5e-4, repeats=4, window=3):
 
     return df
 
-def evenly_spaced_data(df, interval=300, points=20):
-    Tdata = df['T'].to_numpy()
-    cs_data = np.sqrt( df['sp_of_snd_sq'].to_numpy() )
+def evenly_spaced_data(xdata, ydata, interval=300, points=20):
+    xdata = np.array(xdata)
+    ydata = np.array(ydata)
 
-    interval = interval if interval else (Tdata.max() - Tdata.min())/(points + 1)
-    Tplot = [0.]
-    cs_plot = [0.]
+    interval = interval if interval else (xdata.max() - xdata.min())/(points + 1)
 
-    for i in range(len(Tdata)):
-        if Tdata[i] - Tplot[-1] > interval:
-            Tplot.append(Tdata[i])
-            cs_plot.append(cs_data[i])
+    xplot = [0.]
+    yplot = [0.]
+
+    for i in range(len(xdata)):
+
+        if xdata[i] - xplot[-1] > interval:
+
+            xplot.append(xdata[i])
+
+            yplot.append(ydata[i])
     
-    return Tplot[1:], cs_plot[1:]
+    return xplot[1:], yplot[1:]
+
+
+def get_parameters_from_particle_type(particle_type):
+    # we are working with:
+    # baryons : m = 940, R = 0.39
+    # pions :   m = 140, R = 0.39
+    # light mesons: m = 20, 25, 30, R = 0.4
+    if particle_type == 'baryons':
+        m = 940.
+        R = 0.39
+    elif particle_type == 'pions':
+        m = 140.
+        R = 0.39
+    elif 'ligth_mes' in particle_type:
+        R = 0.4
+        m = float(particle_type[len('ligth_mes_m_'):])    # cutting string to get m value
+    else:
+        raise Exception('Wrong particle type')
+
+    return m, R
