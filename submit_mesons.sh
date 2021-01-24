@@ -1,12 +1,12 @@
 #!/bin/bash
 
-labels=("vdw" "IST" "ISCT" "ISCT2")
-g_array=(3)
-masses=(20 25 30)
+labels=("ISCT" "ISCT2")
+g_array=x(3)
+masses=(30)
 b_array=(0 1)
 # radius and chem. potential
 R=0.4
-mu=0
+mu_array=(200 400 600)
 
 
 # submitting light mesons
@@ -18,10 +18,13 @@ for m in "${masses[@]}"; do
 
             for g in ${g_array[@]}; do
 
-                echo Submitting light mesons with m: ${m} ${label} g: ${g} mu: ${mu} b: ${b}
-                sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
-                sleep 1
+                for mu in ${mu_array[@]}; do
 
+                    echo Submitting light mesons with m: ${m} ${label} g: ${g} mu: ${mu} b: ${b}
+                    sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
+                    sleep 1
+
+                done
             done
         done
     done
