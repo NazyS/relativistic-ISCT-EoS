@@ -132,14 +132,14 @@ class Relativistic_ISCT(Eq_of_state):
     def root(self, T, *mu, p0=[1., 1., 1.], **kwargs):
         return fsolve(self.EoS, p0, args=(T, *mu), **kwargs)
 
-    def v_eff_ratio(self, T, p, Sigma, K):
+    def v_eff_ratio(self, comp, T, p, Sigma, K):
 
         def phi_int(operator):
-            def int_func(x): return integrate.quadrature(lambda theta: self.momentum_part(x, T) *
-                                                         np.sin(theta)*operator(self.m * np.tan(np.pi/4*(x+1)), theta), 0., np.pi/2.)[0]
+            def int_func(x): return integrate.quadrature(lambda theta: self.momentum_part(comp, x, T) *
+                                                         np.sin(theta)*operator(comp, self.m * np.tan(np.pi/4*(x+1)), theta), 0., np.pi/2.)[0]
             return integrate.quad(int_func, -1., 1.)[0]
 
         v_numerator = p * phi_int(self.v_operator) + Sigma * phi_int(self.s_operator) + K * phi_int(self.c_operator)
-        v_denumerator = p * phi_int(lambda x, y: 1.)
+        v_denumerator = p * phi_int(lambda x, y, z: 1.)
         v_eff = v_numerator / v_denumerator
         return v_eff/(4*self.v)
