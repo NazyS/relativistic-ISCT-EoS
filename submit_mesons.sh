@@ -1,12 +1,12 @@
 #!/bin/bash
 
 labels=("ISCT" "ISCT2")
-g_array=x(3)
+g_array=(30 300 3000)
 masses=(30)
 b_array=(0 1)
 # radius and chem. potential
 R=0.4
-mu_array=(200 400 600)
+mu_array=(0 200 400 600)
 
 
 # submitting light mesons
