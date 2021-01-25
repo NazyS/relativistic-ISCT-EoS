@@ -16,7 +16,7 @@ for label in "${labels[@]}"; do
         for g in ${g_array[@]}; do
 
             echo Submitting pions ${label} g: ${g} mu: ${mu} b: ${b}
-            sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
+            sbatch --partition $1 script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
             sleep 1
 
         done

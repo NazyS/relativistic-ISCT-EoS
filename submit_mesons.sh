@@ -21,7 +21,7 @@ for m in "${masses[@]}"; do
                 for mu in ${mu_array[@]}; do
 
                     echo Submitting light mesons with m: ${m} ${label} g: ${g} mu: ${mu} b: ${b}
-                    sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
+                    sbatch --partition $1 script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
                     sleep 1
 
                 done
