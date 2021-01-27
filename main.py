@@ -32,7 +32,7 @@ class Eq_of_state:
 
     @lru_cache(maxsize=512)
     def p_eq(self, T, *mu, init=None, format='p only', **kwargs):
-        init = init if init else np.full(self.num_of_eq_in_eos, 0.)
+        init = init if init else np.full(self.num_of_eq_in_eos, 1.)
         root = fsolve(self.EoS, init, args=(T, *mu),
                       maxfev=10000
                       )
