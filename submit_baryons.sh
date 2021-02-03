@@ -19,7 +19,7 @@ for label in "${labels[@]}"; do
             for mu in ${mu_array[@]}; do
 
                 echo Submitting baryons ${label} g: ${g} mu: ${mu} b: ${b}
-                sbatch script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
+                sbatch --partition $1 script.sh sp_of_snd.py ${m} ${label} ${g} ${mu} ${b} ${R}
                 sleep 1
 
             done
