@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.integrate import quad
-from scipy.optimize import fsolve
+from scipy.optimize import fsolve, newton
 from scipy.misc import derivative
 
 # for storing func results in cache for multiple use
@@ -31,11 +31,17 @@ def phi(T, m):
 class Eq_of_state:
 
     @lru_cache(maxsize=512)
-    def p_eq(self, T, *mu, init=None, format='p only', **kwargs):
+    def p_eq(self, T, *mu, init=None, format='p only', method='fsolve', **kwargs):
         init = init if init else np.full(self.num_of_eq_in_eos, 1.)
-        root = fsolve(self.EoS, init, args=(T, *mu),
-                      maxfev=10000
-                      )
+        if method=='fsolve':
+            root = fsolve(self.EoS, init, args=(T, *mu),
+                        maxfev=10000
+                        )
+        elif method=='newton':
+            root = newton(self.EoS, init, args=(T, *mu), maxiter=10000)
+        else:
+            raise Exception('Wrong method specified!')
+
         diff = self.EoS(root, T, *mu)
         if sum(diff[i]**2/root[i]**2 for i in range(len(diff))) > 1e-4:
             print('error for T={}, mu={}'.format(T, mu[0]))
