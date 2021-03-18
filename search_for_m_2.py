@@ -9,10 +9,11 @@ import sys
 # inputting temperature T and entropy ratio
 T = float(sys.argv[1])
 entr_ratio = float(sys.argv[2])
+BAR_DENS = float(sys.argv[3])
 
 print('*'*50)
 print('input:')
-print('T: {}\t entr_ratio {}'.format(T, entr_ratio))
+print('T: {}\t entr_ratio: {}\t bar_dens: {}'.format(T, entr_ratio, BAR_DENS))
 print('*'*50)
 sys.stdout.flush()
 
@@ -25,7 +26,7 @@ G_BOSON = G_TOTAL - 7./4.*G_FERMION
 # ENTR_TO_BAR_DENS_RATIO = 11.31482
 
 # fixed baryon density for mixed hadron phase
-BAR_DENS = 13.
+# BAR_DENS = 13.
 
 def search_for_low_m(root, T, entr_ratio):
     m, mu_b = root
