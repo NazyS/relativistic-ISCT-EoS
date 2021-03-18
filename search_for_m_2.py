@@ -53,10 +53,11 @@ else:
 filename = 'low_m_search_T_{}_entr_ratio_{}_bar_dens_{}_.csv'.format(T, entr_ratio, BAR_DENS)
 
 df = pd.DataFrame({
-    'T':T,
-    'mu':mu_b,
-    'm':m,
-    'entr_per_bar_dens':entr_ratio
+    'T':[T],
+    'mu':[mu_b],
+    'm':[m],
+    'entr_per_bar_dens':[entr_ratio],
+    'bar_dens':[BAR_DENS],
 })
 
 df.to_csv(filename, index=False)
