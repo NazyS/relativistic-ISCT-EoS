@@ -4,8 +4,10 @@
 # mu_array=()
 
 T_array=(125 130 135)
-entr_ratio_array=(11 11.31482 12 13 14 15)
-bar_dens_array=(15 16)
+# entr_ratio_array=(11 11.31482 12 13 14 15)
+# bar_dens_array=(15 16)
+entr_ratio_array=(7 8 9 10)
+bar_dens_array=(11 12 13)
 
 # radius
 # R=0.39

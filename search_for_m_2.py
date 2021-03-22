@@ -19,7 +19,8 @@ sys.stdout.flush()
 
 # Bugaev, K.A., Emaus, R., Sagun, V.V. et al. Threshold Collision Energy of the QCD Phase Diagram Tricritical Endpoint. Phys. Part. Nuclei Lett. 15, 210–224 (2018). https://doi.org/10.1134/S1547477118030068
 G_TOTAL = 1770.
-G_FERMION = 140.                # approx 141 in article 
+# G_FERMION = 140.                # approx 141 in article 
+G_FERMION = 126.                # 10% lower 
 G_BOSON = G_TOTAL - 7./4.*G_FERMION
 
 # Bugaev, K.A., Ivanytskyi, A.I., Oliinychenko, D.R. et al. Thermodynamically anomalous regions as a mixed phase signal. Phys. Part. Nuclei Lett. 12, 238–245 (2015). https://doi.org/10.1134/S1547477115020065
@@ -30,12 +31,12 @@ G_BOSON = G_TOTAL - 7./4.*G_FERMION
 
 def search_for_low_m(root, T, entr_ratio):
     m, mu_b = root
-    eos = Relativistic_ISCT(m=m, R=0.39, b=0.,  components=2, eos='ISCT', g=[G_FERMION, G_BOSON])
+    eos = Relativistic_ISCT(m=[1.5*m, m], R=0.39, b=0.,  components=2, eos='ISCT', g=[G_FERMION, G_BOSON])
     bar_dens = eos.density_baryon(T, mu_b, 0.)
     entr_per_bar_dens = eos.entropy(T, mu_b, 0.)/bar_dens
     return entr_per_bar_dens - entr_ratio, bar_dens - BAR_DENS
 
-root, info, solved, msg = fsolve(search_for_low_m, [30., 400.], args=(T, entr_ratio), full_output=1)
+root, info, solved, msg = fsolve(search_for_low_m, [10., 300.], args=(T, entr_ratio), full_output=1)
 m, mu_b = root
 
 print(msg)
@@ -51,7 +52,7 @@ else:
     )
 
 
-filename = 'low_m_search_T_{}_entr_ratio_{}_bar_dens_{}_.csv'.format(T, entr_ratio, BAR_DENS)
+filename = 'low_m_search_T_{}_entr_ratio_{}_bar_dens_{}_nm_lgf.csv'.format(T, entr_ratio, BAR_DENS)
 
 df = pd.DataFrame({
     'T':[T],
