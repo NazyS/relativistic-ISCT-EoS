@@ -61,28 +61,6 @@ class Eq_of_state:
     def density_baryon(self, T, *mu, **kwargs):
         return sum(self.density_baryon_comp(i, T, *mu, **kwargs) for i in range(len(mu)))
 
-    # particle density of single component
-    # @lru_cache(maxsize=512)
-    # def density_comp(self, comp_number, T, *mu, **kwargs):
-    #     return partial_derivative(self.p_eq, 1+comp_number, [T, *mu], **kwargs)
-
-    # baryon minus its imaginary antibaryon density for each component
-    # 0.5 factor due to same input from actual antibaryon term with opposite sign in total baryon charge density
-    # def baryon_minus_antibaryon_comp_density_halfed(self, comp_number, T, *mu, **kwargs):
-    #     mu_inverted = tuple([-el for el in mu])
-    #     return 0.5*(self.density_comp(comp_number, T, *mu, **kwargs) - self.density_comp(comp_number, T, *mu_inverted, **kwargs))
-
-    # baryon charge density which is baryon density minus antibaryon charge density
-    # def density_baryon(self, T, *mu, **kwargs):
-    #     return sum(np.sign(mu)[i] * self.baryon_minus_antibaryon_comp_density_halfed(i, T, *mu, **kwargs) for i in range(self.num_of_components))
-
-    # total particle density
-    # def density(self, T, *mu, **kwargs):
-    #     return sum(self.density_comp(i, T, *mu, **kwargs) for i in range(self.num_of_components))
-
-    # def energy(self, T, *mu, **kwargs):
-    #     return T*self.entropy(T, *mu, **kwargs) + sum(mu[i]*self.baryon_minus_antibaryon_comp_density_halfed(i, T, *mu, **kwargs) for i in range(self.num_of_components)) - self.p_eq(T, *mu, **kwargs)
-
     def energy(self, T, *mu, **kwargs):
         return T*self.entropy(T, *mu, **kwargs) + sum(mu[i]*self.density_baryon_comp(i, T, *mu, **kwargs) for i in range(len(mu))) - self.p_eq(T, *mu, **kwargs)
 
