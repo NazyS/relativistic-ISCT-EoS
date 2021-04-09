@@ -7,13 +7,13 @@ from scipy.misc import derivative
 from functools import lru_cache
 
 
-def partial_derivative(func, var=0, point=[], dx=1e-1, order=3, **kwargs):
+def partial_derivative(func, var=0, point=[], dx=1e-1, order=3, n=1, **kwargs):
     args = point[:]
 
     def wraps(x):
         args[var] = x
         return func(*args, **kwargs)
-    return derivative(wraps, point[var], dx=dx, order=order)
+    return derivative(wraps, point[var], dx=dx, order=order+(n-1)*2, n=n)
 
 
 hbar = 197.3269804
@@ -128,6 +128,10 @@ class Eq_of_state:
         denum = partial_derivative(self.energy, 0, [T, *mu], **kwargs) - \
             deriv_by_sigma_with_const_T(self.energy, T, *mu)*sigma_deriv
         return num/denum
+
+    def cumulant_per_vol(self, order, comp, T, *mu, **kwargs):
+        derivative = partial_derivative(self.p_eq, 1+comp, [T, *mu], n=order, **kwargs)
+        return T**(order - 1)*derivative
 
 
 def get_changable_dx(T):
