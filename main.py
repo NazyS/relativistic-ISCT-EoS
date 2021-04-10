@@ -29,6 +29,12 @@ def phi(T, m):
 
 # Main equation of state Class
 class Eq_of_state:
+    '''
+    define "num_of_eq_in_eos" and "num_of_components" variables while inheriting
+    define "EoS(root, T, *mu)" method or overwrite "p_eq(T, *mu)" method
+
+    Main class for equation of state and speed of sound calculations
+    '''
 
     @lru_cache(maxsize=512)
     def p_eq(self, T, *mu, init=None, format='p only', method='fsolve', **kwargs):
@@ -129,9 +135,16 @@ class Eq_of_state:
             deriv_by_sigma_with_const_T(self.energy, T, *mu)*sigma_deriv
         return num/denum
 
+    @lru_cache(maxsize=512)
     def cumulant_per_vol(self, order, comp, T, *mu, **kwargs):
         derivative = partial_derivative(self.p_eq, 1+comp, [T, *mu], n=order, **kwargs)
         return T**(order - 1)*derivative
+
+    def cumul_lin_ratio(self, T, *mu):
+        return T*self.cumulant_per_vol(1, 0, T, *mu)/mu[0]/self.cumulant_per_vol(2, 0, T, *mu)
+
+    def cumul_sq_ratio(self, T, *mu):
+        return 1. - self.cumulant_per_vol(3, 0, T, *mu)*self.cumulant_per_vol(1, 0, T, *mu)/self.cumulant_per_vol(2, 0, T, *mu)**2
 
 
 def get_changable_dx(T):
