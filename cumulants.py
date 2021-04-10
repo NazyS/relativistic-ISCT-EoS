@@ -12,7 +12,7 @@ g_bos = float(sys.argv[4])
 
 print('*'*50)
 print('input:')
-print('T: {}\t m_bos: {}'.format(T, m_bos))
+print('T: {}\t m_bos: {}\t g_fer: {}\t g_bos: {}'.format(T, m_bos, g_fer, g_bos))
 print('*'*50)
 sys.stdout.flush()
 
