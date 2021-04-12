@@ -1,18 +1,18 @@
 import numpy as np
 
-def clean_outliers_and_mask(df, threshold=5e-4, repeats=4, window=3):
+def clean_outliers_and_mask(df, label='sp_of_snd_sq', threshold=5e-4, repeats=4, window=3):
 
     for _ in range(repeats):
-        cs_data = df['sp_of_snd_sq']
-        diff = np.abs((cs_data - cs_data.fillna(method='bfill').fillna(method='ffill')
+        data = df[label]
+        diff = np.abs((data - data.fillna(method='bfill').fillna(method='ffill')
 .rolling(window, center=True).median()))
-        # diff = np.abs((cs_data - cs_data.rolling(window, center=True).mean()))
+        # diff = np.abs((data - data.rolling(window, center=True).mean()))
         outliers = diff > threshold
         
         mask = np.invert(outliers)
         df = df[mask]
 
-    nan_mask = np.invert(df['sp_of_snd_sq'].isna())
+    nan_mask = np.invert(df[label].isna())
     df = df[nan_mask]
 
     return df
