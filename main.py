@@ -140,17 +140,18 @@ class Eq_of_state:
         derivative = partial_derivative(self.p_eq, 1+comp, [T, *mu], n=order, **kwargs)
         return T**(order - 1)*derivative
 
-    def cumul_lin_ratio(self, T, *mu):
-        return T*self.cumulant_per_vol(1, 0, T, *mu)/mu[0]/self.cumulant_per_vol(2, 0, T, *mu)
+    def cumul_lin_ratio(self, T, *mu, **kwargs):
+        return T*self.cumulant_per_vol(1, 0, T, *mu, **kwargs)/mu[0]/self.cumulant_per_vol(2, 0, T, *mu, **kwargs)
 
-    def cumul_sq_ratio(self, T, *mu):
-        return 1. - self.cumulant_per_vol(3, 0, T, *mu)*self.cumulant_per_vol(1, 0, T, *mu)/self.cumulant_per_vol(2, 0, T, *mu)**2
+    def cumul_sq_ratio(self, T, *mu, **kwargs):
+        return 1. - self.cumulant_per_vol(3, 0, T, *mu, **kwargs)*self.cumulant_per_vol(1, 0, T, *mu, **kwargs)/self.cumulant_per_vol(2, 0, T, *mu, **kwargs)**2
 
 
-def get_changable_dx(T):
-    if T<100.:
+def get_changable_dx(var):
+    # suitable for T or mu (prob)
+    if var<100.:
         return 1e-3
-    elif T<500.:
+    elif var<500.:
         return 1e-1
     else:
         return 1.

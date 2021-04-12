@@ -1,4 +1,5 @@
 from eos.relativistic_ISCT import Relativistic_ISCT
+from main import get_changable_dx
 import numpy as np
 import pandas as pd
 import sys
@@ -34,16 +35,18 @@ for mu in mu_data:
     print('mu: {}'.format(mu))
     sys.stdout.flush()
 
-    p, Sigma, K = eos.p_eq(T, mu, 0., format='full')
+    dx = get_changable_dx(mu)
+
+    p, Sigma, K = eos.p_eq(T, mu, 0., format='full', dx=dx)
     p_data.append(p)
     Sigma_data.append(Sigma)
     K_data.append(K)
 
-    k1_data.append(eos.cumulant_per_vol(1, 0, T, mu, 0.))
-    k2_data.append(eos.cumulant_per_vol(2, 0, T, mu, 0.))
-    k3_data.append(eos.cumulant_per_vol(3, 0, T, mu, 0.))
-    k_lin_ratio.append(eos.cumul_lin_ratio(T, mu, 0.))
-    k_sq_ratio.append(eos.cumul_sq_ratio(T, mu, 0.))
+    k1_data.append(eos.cumulant_per_vol(1, 0, T, mu, 0., dx=dx))
+    k2_data.append(eos.cumulant_per_vol(2, 0, T, mu, 0., dx=dx))
+    k3_data.append(eos.cumulant_per_vol(3, 0, T, mu, 0., dx=dx))
+    k_lin_ratio.append(eos.cumul_lin_ratio(T, mu, 0., dx=dx))
+    k_sq_ratio.append(eos.cumul_sq_ratio(T, mu, 0., dx=dx))
 
 
 df = pd.DataFrame({
@@ -58,9 +61,7 @@ df = pd.DataFrame({
     'k_sq_ratio':k_sq_ratio
 })
 
-print(df)
-
-filename = 'cumul_data_T_{}_m_bos_{}_g_fer_{}_g_bos_{}_.csv'.format(T, m_bos, g_fer, g_bos)
+filename = 'cumul_data2_T_{}_m_bos_{}_g_fer_{}_g_bos_{}_.csv'.format(T, m_bos, g_fer, g_bos)
 folder = 'cs_sq_fulldata/cumuls'
 if not os.path.exists(folder):
     os.makedirs(folder)
