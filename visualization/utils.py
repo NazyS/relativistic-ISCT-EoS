@@ -1,14 +1,13 @@
 import numpy as np
 
+
 def clean_outliers_and_mask(df, label='sp_of_snd_sq', threshold=5e-4, repeats=4, window=3):
 
     for _ in range(repeats):
         data = df[label]
-        diff = np.abs((data - data.fillna(method='bfill').fillna(method='ffill')
-.rolling(window, center=True).median()))
-        # diff = np.abs((data - data.rolling(window, center=True).mean()))
+        diff = np.abs((data - data.fillna(method='bfill').fillna(method='ffill').rolling(window, center=True).median()))
         outliers = diff > threshold
-        
+
         mask = np.invert(outliers)
         df = df[mask]
 
@@ -16,6 +15,7 @@ def clean_outliers_and_mask(df, label='sp_of_snd_sq', threshold=5e-4, repeats=4,
     df = df[nan_mask]
 
     return df
+
 
 def evenly_spaced_data(xdata, ydata, interval=300, points=20):
     xdata = np.array(xdata)
@@ -33,7 +33,7 @@ def evenly_spaced_data(xdata, ydata, interval=300, points=20):
             xplot.append(xdata[i])
 
             yplot.append(ydata[i])
-    
+
     return xplot[1:], yplot[1:]
 
 
