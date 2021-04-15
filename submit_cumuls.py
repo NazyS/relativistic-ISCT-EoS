@@ -13,10 +13,11 @@ g_vals = [
 
 for i in range(len(selected_df)):
     row = selected_df.iloc[i]
-    T = row['T']
+    # T = row['T']
     m_bos = row['m']
 
     for g_pairs in g_vals:
         g_fer, g_bos = g_pairs
 
-        os.system('sbatch -p {} script.sh cumulants.py {} {} {} {}'.format(partition, T, m_bos, g_fer, g_bos))
+        # os.system('sbatch -p {} script.sh cumulants.py {} {} {} {}'.format(partition, T, m_bos, g_fer, g_bos))
+        os.system('sbatch -p {} script.sh cumulants.py {} {} {}'.format(partition, m_bos, g_fer, g_bos))
