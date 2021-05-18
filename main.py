@@ -2,6 +2,7 @@ import numpy as np
 from scipy.integrate import quad
 from scipy.optimize import fsolve, newton
 from scipy.misc import derivative
+from scipy.interpolate import InterpolatedUnivariateSpline
 
 # for storing func results in cache for multiple use
 from functools import lru_cache
@@ -37,13 +38,13 @@ class Eq_of_state:
     '''
 
     @lru_cache(maxsize=512)
-    def p_eq(self, T, *mu, init=None, format='p only', method='fsolve', **kwargs):
+    def p_eq(self, T, *mu, init=None, format='p only', method='fsolve', xtol=1.49012e-08, **kwargs):
         init = init if init else np.full(self.num_of_eq_in_eos, 1.)
-        if method=='fsolve':
+        if method == 'fsolve':
             root = fsolve(self.EoS, init, args=(T, *mu),
-                        maxfev=10000
-                        )
-        elif method=='newton':
+                          maxfev=10000, xtol=xtol,
+                          )
+        elif method == 'newton':
             root = newton(self.EoS, init, args=(T, *mu), maxiter=10000)
         else:
             raise Exception('Wrong method specified!')
@@ -150,11 +151,112 @@ class Eq_of_state:
 
 def get_changable_dx(var):
     # suitable for T or mu (prob)
-    if var<100.:
+    if var < 100.:
         return 1e-3
     elif var<250.:
         return 1e-2
-    elif var<500.:
+    elif var < 500.:
         return 1e-1
     else:
         return 1.
+
+
+class splined_Eq_of_state:
+    '''
+    Main EoS class using splines for derivative calculations
+
+    define "num_of_eq_in_eos" and "num_of_components" variables in child class
+    define "EoS(root, T, *mu)" method or overwrite "p_eq(T, *mu)" method in child class
+    '''
+    @lru_cache(maxsize=512)
+    def splined_root(self, T, *mu, init=None, **kwargs):
+        init = init if init else np.full(self.num_of_eq_in_eos, 1.)
+
+        root, infodict, ier, msg = fsolve(self.EoS, init, args=(T, *mu), full_output=1, **kwargs)
+        if ier != 1:
+            print(msg)
+            return np.full(self.num_of_eq_in_eos, np.nan), infodict
+        else:
+            return root, infodict
+
+    def splined_p_eq(self, T, *mu, **kwargs):
+        root, _ = self.splined_root(T, *mu, **kwargs)
+        return root[0]
+
+    def get_spline(self, cut, *vars, splinedata=None, range=5., points=5, k=3, **kwargs):
+        '''
+        Returns interpolated spline either 
+            1) among points in range [var[cut] - range, var[cut] + range]
+            2) using splinedata tuple
+            CAREFUL to use correct datarange in splinedata which corresponds 
+                    exactly to the variable you are going to derive
+        '''
+        if splinedata:
+            spline = InterpolatedUnivariateSpline(splinedata[0], splinedata[1], k=k)
+        else:
+            xdata = np.linspace(vars[cut] - range, vars[cut] + range, points)
+            pdata = []
+            for x in xdata:
+                pdata.append(self.splined_p_eq(*vars[:cut], x, *vars[cut+1:], **kwargs))
+            spline = InterpolatedUnivariateSpline(xdata, pdata, k=k)
+        return spline
+
+    def splined_entropy(self, T, *mu, **kwargs):
+        '''
+        Use ONLY temperature T datarange in splinedata
+        '''
+        spline = self.get_spline(0, T, *mu, **kwargs)
+        return spline.derivative()(T)
+
+    def splined_density_baryon_comp(self, comp, T, *mu, **kwargs):
+        '''
+        Use ONLY respective mu[comp] datarange in splinedata
+        '''
+        spline = self.get_spline(1+comp, T, *mu, **kwargs)
+        return spline.derivative()(mu[comp])
+
+    def splined_density_baryon(self, T, *mu, splinedata=None, **kwargs):
+        '''
+        Use ONLY mu[0] datarange (mu_b) in splinedata
+        splinedata supported here ONLY for single component case
+        since multiple dataranges required in multicomponent case (one for each component)
+        '''
+        if self.num_of_components == 1:
+            return self.splined_density_baryon_comp(0, T, *mu, **kwargs)
+        else:
+            if splinedata is not None:
+                raise Exception('splinedata not supported here')
+            return np.sum(
+                self.splined_density_baryon_comp(comp, T, *mu, splinedata=None, **kwargs) for comp in range(self.num_of_components)
+            )
+
+    def splined_energy(self, T, *mu, **kwargs):
+        '''
+        Use ONLY temperature T datarange in splinedata
+        It will be used for entropy calculations
+        '''
+        return T*self.splined_entropy(T, *mu, **kwargs) + np.sum(
+            mu[i]*self.splined_density_baryon_comp(i, T, *mu, splinedata=None, **kwargs) for i in range(self.num_of_components)
+        ) - self.splined_p_eq(T, *mu, **kwargs)
+
+    def splined_sigma(self, T, *mu, **kwargs):
+        '''
+        Use ONLY temperature T datarange in splinedata
+        It will be used for entropy calculations
+        '''
+        return self.splined_entropy(T, *mu, **kwargs)/self.splined_density_baryon(T, *mu, splinedata=None, **kwargs)
+
+    # calculation cumulants per volume ratio ( \kappa_j / v )
+    def splined_cumul_per_vol(self, order, comp, T, *mu, **kwargs):
+        '''
+        Use ONLY mu[comp] datarange in splinedata
+        '''
+        spline = self.get_spline(1, T, *mu, **kwargs)
+        deriv = spline.derivative(n=order)
+        return T**(order-1)*deriv(mu[comp])
+
+    def splined_cumul_lin_ratio(self, T, *mu, **kwargs):
+        return T*self.splined_cumul_per_vol(1, 0, T, *mu, **kwargs)/mu[0]/self.splined_cumul_per_vol(2, 0, T, *mu, **kwargs)
+
+    def splined_cumul_sq_ratio(self, T, *mu, **kwargs):
+        return 1. - self.splined_cumul_per_vol(3, 0, T, *mu, **kwargs)*self.splined_cumul_per_vol(1, 0, T, *mu, **kwargs)/self.splined_cumul_per_vol(2, 0, T, *mu, **kwargs)**2

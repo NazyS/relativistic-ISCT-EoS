@@ -1,11 +1,10 @@
 import numpy as np
 import scipy.integrate as integrate
-from scipy.optimize import fsolve
 
-from main import Eq_of_state, hbar
+from main import Eq_of_state, splined_Eq_of_state, hbar
 
 
-class Relativistic_ISCT(Eq_of_state):
+class Relativistic_ISCT(Eq_of_state, splined_Eq_of_state):
     def __init__(self, alpha=1., beta=1., m=940., R=0.5, g=4., alpha_p=1., beta_p=1., a=0.775, b=1., eos=None, components=1):
         self.num_of_components = components
         self.m = self.make_parameter_array(m)
@@ -124,13 +123,10 @@ class Relativistic_ISCT(Eq_of_state):
     def EoS(self, root, T, *mu):
         p, Sigma, K = root
         return (
-            p - sum(self.pPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components)),
-            Sigma - sum(self.SigmaPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components)),
-            K - sum(self.KPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components))
+            p - np.sum(self.pPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components)),
+            Sigma - np.sum(self.SigmaPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components)),
+            K - np.sum(self.KPart(comp, T, mu[comp], p, Sigma, K) for comp in range(self.num_of_components))
         )
-
-    def root(self, T, *mu, p0=[1., 1., 1.], **kwargs):
-        return fsolve(self.EoS, p0, args=(T, *mu), **kwargs)
 
     def v_eff_ratio(self, comp, T, p, Sigma, K):
 
