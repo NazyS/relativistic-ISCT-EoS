@@ -8,7 +8,7 @@ import os
 m_bos = float(sys.argv[1])
 g_fer = float(sys.argv[2])
 g_bos = float(sys.argv[3])
-row = float(sys.argv[4])
+row = int(sys.argv[4])
 
 cumuls_exp = pd.read_csv('cs_sq_fulldata/cumuls/cumuls_star+hades_digit_.csv')
 mu = cumuls_exp['mu'].iloc[row]
