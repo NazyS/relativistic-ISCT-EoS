@@ -31,13 +31,13 @@ print(res)
 T = res.x[0]
 
 df = pd.DataFrame({
-    'T':T,
-    'mu':mu,
-    'k1_data':eos.splined_cumul_per_vol(1, 0, T, mu, 0.),
-    'k2_data':eos.splined_cumul_per_vol(2, 0, T, mu, 0.),
-    'k3_data':eos.splined_cumul_per_vol(3, 0, T, mu, 0.),
-    'cumul_lin_ratio':eos.splined_cumul_lin_ratio(T, mu, 0.),
-    'cumul_sq_ratio':eos.splined_cumul_sq_ratio(T, mu, 0.)
+    'T':[T],
+    'mu':[mu],
+    'k1_data':[eos.splined_cumul_per_vol(1, 0, T, mu, 0.)],
+    'k2_data':[eos.splined_cumul_per_vol(2, 0, T, mu, 0.)],
+    'k3_data':[eos.splined_cumul_per_vol(3, 0, T, mu, 0.)],
+    'cumul_lin_ratio':[eos.splined_cumul_lin_ratio(T, mu, 0.)],
+    'cumul_sq_ratio':[eos.splined_cumul_sq_ratio(T, mu, 0.)],
 })
 
 filename = 'fo_temp_search_mu_{}_m_bos_{}_g_fer_{}_g_bos_{}_.csv'.format(mu, m_bos, g_fer, g_bos)
