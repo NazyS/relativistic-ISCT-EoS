@@ -51,17 +51,18 @@ for dataname in ['exp_fo', 'matched']:
         sys.stdout.flush()
 
         dx = get_changable_dx(mu)
+        order = 5
 
-        p, Sigma, K = eos.p_eq(T, mu, 0., format='full', dx=dx)
+        p, Sigma, K = eos.p_eq(T, mu, 0., format='full')
         p_data.append(p)
         Sigma_data.append(Sigma)
         K_data.append(K)
 
-        k1_data.append(eos.cumulant_per_vol(1, 0, T, mu, 0., dx=dx))
-        k2_data.append(eos.cumulant_per_vol(2, 0, T, mu, 0., dx=dx))
-        k3_data.append(eos.cumulant_per_vol(3, 0, T, mu, 0., dx=dx))
-        k_lin_ratio.append(eos.cumul_lin_ratio(T, mu, 0., dx=dx))
-        k_sq_ratio.append(eos.cumul_sq_ratio(T, mu, 0., dx=dx))
+        k1_data.append(eos.cumulant_per_vol(1, 0, T, mu, 0., dx=dx, order=order))
+        k2_data.append(eos.cumulant_per_vol(2, 0, T, mu, 0., dx=dx, order=order))
+        k3_data.append(eos.cumulant_per_vol(3, 0, T, mu, 0., dx=dx, order=order))
+        k_lin_ratio.append(eos.cumul_lin_ratio(T, mu, 0., dx=dx, order=order))
+        k_sq_ratio.append(eos.cumul_sq_ratio(T, mu, 0., dx=dx, order=order))
 
 
     df = pd.DataFrame({
@@ -77,7 +78,7 @@ for dataname in ['exp_fo', 'matched']:
         'k_sq_ratio':k_sq_ratio
     })
 
-    filename = 'cumul_data_{}_m_bos_{}_g_fer_{}_g_bos_{}_.csv'.format(dataname, m_bos, g_fer, g_bos)
+    filename = 'cumul_data_{}_2_m_bos_{}_g_fer_{}_g_bos_{}_.csv'.format(dataname, m_bos, g_fer, g_bos)
     folder = 'cs_sq_fulldata/cumuls'
     if not os.path.exists(folder):
         os.makedirs(folder)

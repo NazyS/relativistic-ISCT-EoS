@@ -52,7 +52,8 @@ class Eq_of_state:
         if sum(diff[i]**2/root[i]**2 for i in range(len(diff))) > 1e-4:
             print('error for T={}, mu={}'.format(T, mu[0]))
             return np.nan if format == 'p only' else np.full(self.num_of_eq_in_eos, np.nan)
-        return root[0] if format == 'p only' else root
+        else:
+            return root[0] if format == 'p only' else root
 
     # entropy density
     @lru_cache(maxsize=512)
@@ -136,9 +137,9 @@ class Eq_of_state:
         return num/denum
 
     @lru_cache(maxsize=512)
-    def cumulant_per_vol(self, order, comp, T, *mu, **kwargs):
-        derivative = partial_derivative(self.p_eq, 1+comp, [T, *mu], n=order, **kwargs)
-        return T**(order - 1)*derivative
+    def cumulant_per_vol(self, j, comp, T, *mu, **kwargs):
+        derivative = partial_derivative(self.p_eq, 1+comp, [T, *mu], n=j, **kwargs)
+        return T**(j - 1)*derivative
 
     def cumul_lin_ratio(self, T, *mu, **kwargs):
         return T*self.cumulant_per_vol(1, 0, T, *mu, **kwargs)/mu[0]/self.cumulant_per_vol(2, 0, T, *mu, **kwargs)
@@ -151,6 +152,8 @@ def get_changable_dx(var):
     # suitable for T or mu (prob)
     if var<100.:
         return 1e-3
+    elif var<250.:
+        return 1e-2
     elif var<500.:
         return 1e-1
     else:
