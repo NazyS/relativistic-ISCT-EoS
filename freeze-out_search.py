@@ -28,7 +28,7 @@ def match_temp(T, mu, cumul_sq):
 # res = minimize(match_temp, 175., args=(mu, cumul_sq_ratio))
 res = minimize_scalar(match_temp, args=(mu, cumul_sq_ratio), method='bounded', bounds=(20., 250.))
 print(res)
-T = res.x[0]
+T = res.x
 
 df = pd.DataFrame({
     'T':[T],
