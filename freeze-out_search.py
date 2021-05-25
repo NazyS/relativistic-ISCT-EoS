@@ -11,7 +11,8 @@ row = int(sys.argv[4])
 
 cumuls_exp = pd.read_csv('cs_sq_fulldata/cumuls/cumuls_star+hades_digit_.csv')
 mu = cumuls_exp.iloc[row]['mu']
-cumul_sq_ratio = cumuls_exp.iloc[row]['cumul_sq']
+# cumul = cumuls_exp.iloc[row]['cumul_sq']
+cumul = cumuls_exp.iloc[row]['cumul_lin']
 
 print('*'*50)
 print('input:')
@@ -21,12 +22,13 @@ sys.stdout.flush()
 
 eos = Relativistic_ISCT(m=[1.5*m_bos, m_bos], R=0.39, b=0.,  components=2, eos='ISCT', g=[g_fer, g_bos])
 
-def match_temp(T, mu, cumul_sq):
+def match_temp(T, mu, cumul):
     # T = float(T)
-    return (eos.splined_cumul_sq_ratio(T, mu, 0.) - cumul_sq)**2
+    # return (eos.splined_cumul_sq_ratio(T, mu, 0.) - cumul_sq)**2
+    return (eos.splined_cumul_lin_ratio(T, mu, 0.) - cumul)**2
 
 # res = minimize(match_temp, 175., args=(mu, cumul_sq_ratio))
-res = minimize_scalar(match_temp, args=(mu, cumul_sq_ratio), method='bounded', bounds=(20., 250.))
+res = minimize_scalar(match_temp, args=(mu, cumul), method='bounded', bounds=(20., 250.))
 print(res)
 T = res.x
 
