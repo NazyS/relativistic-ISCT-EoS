@@ -83,28 +83,42 @@ class ISCT_SMM(Eq_of_state, splined_Eq_of_state):
         root = self.p_eq(T, *mu, format='full', **kwargs)
         k_index = self.chosen_indices[comp]
 
-        a = 1 + sum(self.pPart(comp, root, T, *mu)*self.V1*k_index/T for comp in range(self.num_of_components))
-        b = 1 + sum(self.sigma1Part(comp, root, T, *mu)*self.alpha[comp]*k_index**(2./3.)/T for comp in range(self.num_of_components))
-        c = 1 + sum(self.c1Part(comp, root, T, *mu)*self.beta[comp]*k_index**(1./3.)/T for comp in range(self.num_of_components))
+        a = 1 + sum(self.pPart(comp, root, T, *mu)*self.V1*self.chosen_indices[comp]/T for comp in range(self.num_of_components))
+        b = 1 + sum(self.sigma1Part(comp, root, T, *mu)*self.alpha[comp]*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
+        c = 1 + sum(self.c1Part(comp, root, T, *mu)*self.beta[comp]*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
 
         delta11 = root[0]*k_index/T
-        delta12 = sum(self.pPart(comp, root, T, *mu)*k_index**(2./3.)/T for comp in range(self.num_of_components))
-        delta13 = sum(self.pPart(comp, root, T, *mu)*k_index**(1./3.)/T for comp in range(self.num_of_components))
+        delta12 = sum(self.pPart(comp, root, T, *mu)*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
+        delta13 = sum(self.pPart(comp, root, T, *mu)*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
 
         delta21 = root[1]*k_index/T
-        delta23 = sum(self.sigma1Part(comp, root, T, *mu)*k_index**(1./3.)/T for comp in range(self.num_of_components))
+        delta23 = sum(self.sigma1Part(comp, root, T, *mu)*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
 
         delta31 = root[2]*k_index/T
-        delta32 = sum(self.c1Part(comp, root, T, *mu)*self.alpha[comp]*k_index**(2./3.)/T for comp in range(self.num_of_components))
-
-        delta21_til = sum(self.sigma1Part(comp, root, T, *mu)*k_index*self.V1/T for comp in range(self.num_of_components))
-        delta31_til = sum(self.c1Part(comp, root, T, *mu)*k_index*self.V1/T for comp in range(self.num_of_components))
+        delta32 = sum(self.c1Part(comp, root, T, *mu)*self.alpha[comp]*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
+        delta21_til = sum(self.sigma1Part(comp, root, T, *mu)*self.chosen_indices[comp]*self.V1/T for comp in range(self.num_of_components))
+        delta31_til = sum(self.c1Part(comp, root, T, *mu)*self.chosen_indices[comp]*self.V1/T for comp in range(self.num_of_components))
 
         num = b*c*delta11 - delta11*delta32*delta23 - c*delta12*delta21 - b*delta13*delta31 + delta12*delta23*delta31 + delta13*delta32*delta21
 
         denum = a*b*c - a*delta32*delta23 - c*delta12*delta21_til - b*delta13*delta31_til + delta31_til*delta12*delta23 + delta13*delta32*delta21_til
 
-        return num/denum
+        dictionary = {
+            'a':[a],
+            'b':[b],
+            'c':[c],
+            'delta11':[delta11],
+            'delta12':[delta12],
+            'delta13':[delta13],
+            'delta21':[delta21],
+            'delta23':[delta23],
+            'delta31':[delta31],
+            'delta32':[delta32],
+            'delta21_til':[delta21_til],
+            'delta31_til':[delta31_til],
+        }
+
+        return num/denum, dictionary
 
     def density_analytical(self, T, *mu, **kwargs):
-        return sum(self.density_analytical_comp(comp, T, *mu, **kwargs) for comp in range(self.num_of_components))
+        return sum(self.density_analytical_comp(comp, T, *mu, **kwargs)[0] for comp in range(self.num_of_components))
