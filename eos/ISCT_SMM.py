@@ -1,7 +1,13 @@
 import numpy as np
 from main import Eq_of_state, splined_Eq_of_state, hbar
 
-class ISCT_SMM(Eq_of_state, splined_Eq_of_state):
+def kron_delta(k, j):
+    if k==j:
+        return 1.
+    else:
+        return 0.
+
+class ISCT_SMM_crit_point(Eq_of_state, splined_Eq_of_state):
     def __init__(self,
         k_indexes=[1, 5, 50, 500],
         g_factors=[1., 9., 90., 900.],
@@ -58,6 +64,8 @@ class ISCT_SMM(Eq_of_state, splined_Eq_of_state):
         else:
             return 1.
 
+    # sigma_0 = -sigma_1 and c_0 = - c_1 in the critical point
+    # which is directly defined here
     def pPart(self, comp, root, T, *mu):
         p, sigma1, c1 = root
         return self.g_factors[comp]*self.gamma(T)*self.b_coefficient(self.chosen_indices[comp], T)/self.chosen_indices[comp]**self.tau*np.exp((self.p_liquid(T, mu[comp]) - p)*self.V1*self.chosen_indices[comp]/T)
@@ -81,23 +89,28 @@ class ISCT_SMM(Eq_of_state, splined_Eq_of_state):
     # derived from full non-limited EoS (probably inapplicable here)
     def density_analytical_comp(self, comp, T, *mu, **kwargs):
         root = self.p_eq(T, *mu, format='full', **kwargs)
-        k_index = self.chosen_indices[comp]
+        # k_index = self.chosen_indices[comp]
+        deriv_sigma0_by_mu = -1.
+        deriv_c0_by_mu = -1.
 
-        a = 1 + sum(self.pPart(comp, root, T, *mu)*self.V1*self.chosen_indices[comp]/T for comp in range(self.num_of_components))
-        b = 1 + sum(self.sigma1Part(comp, root, T, *mu)*self.alpha[comp]*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
-        c = 1 + sum(self.c1Part(comp, root, T, *mu)*self.beta[comp]*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
+        a = 1 + sum(self.pPart(k, root, T, *mu)*self.V1*self.chosen_indices[k]/T for k in range(self.num_of_components))
+        b = 1 + sum(self.sigma1Part(k, root, T, *mu)*self.alpha[k]*self.chosen_indices[k]**(2./3.)/T for k in range(self.num_of_components))
+        c = 1 + sum(self.c1Part(k, root, T, *mu)*self.beta[k]*self.chosen_indices[k]**(1./3.)/T for k in range(self.num_of_components))
 
-        delta11 = root[0]*k_index/T
-        delta12 = sum(self.pPart(comp, root, T, *mu)*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
-        delta13 = sum(self.pPart(comp, root, T, *mu)*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
+        # delta11 = root[0]*k_index/T
+        delta11 = sum(self.pPart(k, root, T, *mu)/T*(self.chosen_indices[k]*kron_delta(k, comp) - deriv_sigma0_by_mu*self.chosen_indices[k]**(2./3.) - deriv_c0_by_mu*self.chosen_indices[k]**(1./3.)) for k in range(self.num_of_components))
+        delta12 = sum(self.pPart(k, root, T, *mu)*self.chosen_indices[k]**(2./3.)/T for k in range(self.num_of_components))
+        delta13 = sum(self.pPart(k, root, T, *mu)*self.chosen_indices[k]**(1./3.)/T for k in range(self.num_of_components))
 
-        delta21 = root[1]*k_index/T
-        delta23 = sum(self.sigma1Part(comp, root, T, *mu)*self.chosen_indices[comp]**(1./3.)/T for comp in range(self.num_of_components))
+        # delta21 = root[1]*k_index/T
+        delta21 = sum(self.sigma1Part(k, root, T, *mu)/T*(self.chosen_indices[k]*kron_delta(k, comp) - deriv_sigma0_by_mu*self.chosen_indices[k]**(2./3.) - deriv_c0_by_mu*self.chosen_indices[k]**(1./3.)) for k in range(self.num_of_components))
+        delta23 = sum(self.sigma1Part(k, root, T, *mu)*self.chosen_indices[k]**(1./3.)/T for k in range(self.num_of_components))
 
-        delta31 = root[2]*k_index/T
-        delta32 = sum(self.c1Part(comp, root, T, *mu)*self.alpha[comp]*self.chosen_indices[comp]**(2./3.)/T for comp in range(self.num_of_components))
-        delta21_til = sum(self.sigma1Part(comp, root, T, *mu)*self.chosen_indices[comp]*self.V1/T for comp in range(self.num_of_components))
-        delta31_til = sum(self.c1Part(comp, root, T, *mu)*self.chosen_indices[comp]*self.V1/T for comp in range(self.num_of_components))
+        # delta31 = root[2]*k_index/T
+        delta31 = sum(self.c1Part(k, root, T, *mu)/T*(self.chosen_indices[k]*kron_delta(k, comp) - deriv_sigma0_by_mu*self.chosen_indices[k]**(2./3.) - deriv_c0_by_mu*self.chosen_indices[k]**(1./3.)) for k in range(self.num_of_components))
+        delta32 = sum(self.c1Part(k, root, T, *mu)*self.alpha[k]*self.chosen_indices[k]**(2./3.)/T for k in range(self.num_of_components))
+        delta21_til = sum(self.sigma1Part(k, root, T, *mu)*self.chosen_indices[k]*self.V1/T for k in range(self.num_of_components))
+        delta31_til = sum(self.c1Part(k, root, T, *mu)*self.chosen_indices[k]*self.V1/T for k in range(self.num_of_components))
 
         num = b*c*delta11 - delta11*delta32*delta23 - c*delta12*delta21 - b*delta13*delta31 + delta12*delta23*delta31 + delta13*delta32*delta21
 
@@ -122,3 +135,13 @@ class ISCT_SMM(Eq_of_state, splined_Eq_of_state):
 
     def density_analytical(self, T, *mu, **kwargs):
         return sum(self.density_analytical_comp(comp, T, *mu, **kwargs)[0] for comp in range(self.num_of_components))
+
+    def density_analytical_simpl_comp(self, comp, T, *mu, **kwargs):
+        root = self.p_eq(T, *mu, format='full', **kwargs)
+
+        num = self.pPart(comp, root, T, *mu)*self.chosen_indices[comp]/T
+        denum = 1 + sum(self.pPart(k, root, T, *mu)*self.V1*self.chosen_indices[k]/T for k in range(self.num_of_components))
+        return num/denum
+
+    def density_analytical_simpl(self, T, *mu, **kwargs):
+        return sum(self.density_analytical_simpl_comp(comp, T, *mu, **kwargs) for comp in range(self.num_of_components))
