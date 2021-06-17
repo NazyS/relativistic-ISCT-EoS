@@ -17,11 +17,17 @@ def clean_outliers_and_mask(df, label='sp_of_snd_sq', threshold=5e-4, repeats=4,
     return df
 
 
-def evenly_spaced_data(xdata, ydata, interval=300, points=20):
+def evenly_spaced_data(xdata, ydata, interval=300, points=10, xscale='log'):
     xdata = np.array(xdata)
     ydata = np.array(ydata)
 
-    interval = interval if interval else (xdata.max() - xdata.min())/(points + 1)
+    if xscale=='log':
+        interval = interval if interval else (xdata.max() - xdata.min())/(points + 1)
+        interval = interval/points
+        delta = (xdata.max()/interval)**(1./(points+2))
+    else:    
+        interval = interval if interval else (xdata.max() - xdata.min())/(points + 1)
+        delta = 1.
 
     xplot = [0.]
     yplot = [0.]
@@ -31,8 +37,8 @@ def evenly_spaced_data(xdata, ydata, interval=300, points=20):
         if xdata[i] - xplot[-1] > interval:
 
             xplot.append(xdata[i])
-
             yplot.append(ydata[i])
+            interval = interval*delta
 
     return xplot[1:], yplot[1:]
 

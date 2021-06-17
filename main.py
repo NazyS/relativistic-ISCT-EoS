@@ -183,22 +183,26 @@ class splined_Eq_of_state:
         root, _ = self.splined_root(T, *mu, **kwargs)
         return root[0]
 
-    def get_spline(self, cut, *vars, splinedata=None, range=5., points=5, k=3, **kwargs):
+    def get_spline(self, cut, *vars, func=None, splinedata=None, range=5., points=5, k=3, **kwargs):
         '''
         Returns interpolated spline either 
             1) among points in range [var[cut] - range, var[cut] + range]
             2) using splinedata tuple
             CAREFUL to use correct datarange in splinedata which corresponds 
                     exactly to the variable you are going to derive
+                    
         '''
+        if not func:
+            func = self.splined_p_eq
+
         if splinedata:
             spline = InterpolatedUnivariateSpline(splinedata[0], splinedata[1], k=k)
         else:
             xdata = np.linspace(vars[cut] - range, vars[cut] + range, points)
-            pdata = []
+            func_data = []
             for x in xdata:
-                pdata.append(self.splined_p_eq(*vars[:cut], x, *vars[cut+1:], **kwargs))
-            spline = InterpolatedUnivariateSpline(xdata, pdata, k=k)
+                func_data.append(func(*vars[:cut], x, *vars[cut+1:], **kwargs))
+            spline = InterpolatedUnivariateSpline(xdata, func_data, k=k)
         return spline
 
     def splined_entropy(self, T, *mu, **kwargs):
@@ -245,6 +249,30 @@ class splined_Eq_of_state:
         It will be used for entropy calculations
         '''
         return self.splined_entropy(T, *mu, **kwargs)/self.splined_density_baryon(T, *mu, splinedata=None, **kwargs)
+
+    def splined_speed_of_s_sq(self, T, *mu, **kwargs):
+        '''
+        No splindedata allowed
+        '''
+        def d_mu_by_dt(T, *mu, comp=0):
+            '''
+            here comp=0 specified for now since only single value of mu_B 
+            (which should be FIRST in mu varible) is supproted for sp of snd
+            '''
+            num = self.get_spline(0, T, *mu, func=self.splined_sigma, splinedata=None, **kwargs).derivative()(T)
+            denum = self.get_spline(1+comp, T, *mu, func=self.splined_sigma, splinedata=None, **kwargs).derivative()(mu[comp])
+            return -num/denum
+
+        d_mu_by_dt = d_mu_by_dt(T, *mu)
+
+        num = self.splined_entropy(T, *mu, **kwargs) + self.splined_density_baryon(T, *mu, **kwargs)*d_mu_by_dt
+
+        d_energy_by_dT = self.get_spline(0, T, *mu, func=self.splined_energy, splinedata=None, **kwargs).derivative()(T)
+        # also only first mu component for now
+        d_energy_by_dmu = self.get_spline(1, T, *mu, func=self.splined_energy, splinedata=None, **kwargs).derivative()(mu[0])
+        denum = d_energy_by_dT + d_energy_by_dmu*d_mu_by_dt
+
+        return num/denum
 
     # calculation cumulants per volume ratio ( \kappa_j / v )
     def splined_cumul_per_vol(self, order, comp, T, *mu, **kwargs):
