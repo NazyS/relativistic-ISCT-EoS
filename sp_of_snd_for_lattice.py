@@ -16,6 +16,9 @@ print('************************************************************')
 folder = 'cs_sq_fulldata'
 filepath = 'cs_sq_fulldata_mixture_g_M_{}_g_B_{}_mu_{}_.csv'.format(g_M, g_B, mu)
 
+print('Saving to ', filepath)
+print('************************************************************')
+
 # mixture of nucleons, pions, heavy mesons and heavy baryons
 eos = Relativistic_ISCT(
     components=4,
@@ -26,7 +29,7 @@ eos = Relativistic_ISCT(
     b=0,    # all virial coeff. contracted
     )
 
-Tdata = np.linspace(2., 3000., 200)
+Tdata = np.linspace(15., 3000., 100)
 pdata = []
 Sigmadata = []
 Kdata = []
@@ -48,17 +51,14 @@ for T in Tdata:
     densitydata.append(eos.splined_density_baryon(T, *mu))
     cs_sq_data.append(eos.splined_speed_of_s_sq(T, *mu))
 
-df = pd.DataFrame({
-    'T':Tdata,
-    'p':pdata,
-    'Sigma':Sigmadata,
-    'K':Kdata,
-    'entropy':entropydata,
-    'density_baryon':densitydata,
-    'sp_of_snd_sq':cs_sq_data
-})
+    df = pd.DataFrame({
+        'T':Tdata,
+        'p':pdata,
+        'Sigma':Sigmadata,
+        'K':Kdata,
+        'entropy':entropydata,
+        'density_baryon':densitydata,
+        'sp_of_snd_sq':cs_sq_data
+    })
 
-df.to_csv(os.path.join(folder, filepath), index=False)
-
-print('Saved to ', filepath)
-print('************************************************************')
+    df.to_csv(os.path.join(folder, filepath), index=False)
