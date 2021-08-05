@@ -3,6 +3,7 @@ v_eff_ISCT
 notes
 __pycache__/
 .ipynb*
+.vscode
 slurm*
 cs_sq_fulldata
 plots
