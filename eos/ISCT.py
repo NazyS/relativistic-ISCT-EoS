@@ -225,6 +225,66 @@ class ISCT(Eq_of_state):
             self.KFull(p, Sigma, K, T, *mu) - K,
         )
 
+    # notations for virial expansion
+    # Yakovenko et al. Int. J. Mod. Phys. E 29, 11, 2040010 (2020)
+    # https://arxiv.org/abs/2004.08693
+    def beta_p(self):
+        return self.B[0]
+
+    def gamma(self):
+        return 3 * (self.Alpha[0] - 1) * (1 - self.beta_p()) * self.v(0)
+
+    def delta(self):
+        return 3.0 * self.beta_p() * (self.Beta[0] - 1) * self.v(0)
+
+    def virial_expansion_Sigma(self, rho, order=5):
+        """
+        expansion of Sigma divided by T
+
+        max order: 5
+        """
+        if order > 5 or order < 1:
+            raise Exception("Wrong order for virial exception specified")
+
+        v = self.v(0)
+        gamma = self.gamma()
+        delta = self.delta()
+        beta_p = self.beta_p()
+        coeffs = [
+            1,
+            4 * v - gamma,
+            16 * v ** 2 + 3 * gamma ** 2 / 2 + v * (-14 * gamma - 6 * delta * beta_p),
+            64 * v ** 3
+            - 8 * gamma ** 3 / 3
+            + v ** 2 * (-120 * gamma - 72 * delta * beta_p)
+            + v
+            * (
+                87 * gamma ** 2 / 2
+                + (30 * gamma * delta + 27 * delta ** 2 / 2) * beta_p
+            ),
+            256 * v ** 4
+            + 125 * gamma ** 4 / 24
+            + v ** 3 * (-832 * gamma - 576 * delta * beta_p)
+            + v ** 2
+            * (
+                624 * gamma ** 2
+                + 24 * delta * (26 * gamma + 9 * delta) * beta_p
+                + 72 * delta ** 2 * beta_p ** 2
+            )
+            + v
+            * (
+                (-111 * gamma ** 2 * delta - 81 * gamma * delta ** 2 - 32 * delta ** 3)
+                * beta_p
+                - 386 * gamma ** 3 / 3
+            ),
+        ]
+
+        return (
+            self.A[0]
+            * self.R[0]
+            * sum(rho ** (k + 1) * coeffs[k] for k in range(order))
+        )
+
     # Generating string of EoS parameters
     # generates a string from values of array with corresponding names
     def gen_str_for_array(self, array, name="name", quantity=""):
