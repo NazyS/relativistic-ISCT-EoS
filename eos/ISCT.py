@@ -237,6 +237,48 @@ class ISCT(Eq_of_state):
     def delta(self):
         return 3.0 * self.beta_p() * (self.Beta[0] - 1) * self.v(0)
 
+    def virial_expansion_p(self, rho, order=5):
+        """
+        expansion of p divided by T
+
+        max order: 5
+        """
+        if order > 5 or order < 1:
+            raise Exception("Wrong order for virial exception specified")
+
+        v = self.v(0)
+        gamma = self.gamma()
+        delta = self.delta()
+        beta_p = self.beta_p()
+
+        coeffs = [
+            1,
+            4 * v,
+            16 * v ** 2 - 6 * v * (gamma + delta * beta_p),
+            64 * v ** 3
+            - 72 * v ** 2 * (gamma + delta * beta_p)
+            + 9.0
+            / 2.0
+            * v
+            * (3 * gamma ** 2 + delta * (4 * gamma + 3 * delta) * beta_p),
+            256 * v ** 4
+            - 576 * v ** 3 * (gamma + delta * beta_p)
+            + v ** 2
+            * (
+                288 * gamma ** 2
+                + 216 * delta * (2 * gamma + delta) * beta_p
+                + 72 * delta ** 2 * beta_p ** 2
+            )
+            - 2
+            * v
+            * (
+                16 * gamma ** 3
+                + (24 * gamma ** 2 * delta + 27 * gamma * delta ** 2 + 16 * delta ** 3)
+                * beta_p
+            ),
+        ]
+        return sum(rho ** (k + 1) * coeffs[k] for k in range(order))
+
     def virial_expansion_Sigma(self, rho, order=5):
         """
         expansion of Sigma divided by T
@@ -282,6 +324,82 @@ class ISCT(Eq_of_state):
         return (
             self.A[0]
             * self.R[0]
+            * sum(rho ** (k + 1) * coeffs[k] for k in range(order))
+        )
+
+    def virial_expansion_K(self, rho, order=5):
+        """
+        expansion of K divided by T
+
+        max order: 5
+        """
+        if order > 5 or order < 1:
+            raise Exception("Wrong order for virial exception specified")
+
+        v = self.v(0)
+        gamma = self.gamma()
+        delta = self.delta()
+        beta_p = self.beta_p()
+
+        coeffs = [
+            1,
+            4 * v - gamma - delta,
+            16 * v ** 2
+            + 3 * gamma ** 2 / 2
+            + 2 * gamma * delta + 3 * delta ** 2 / 2
+            + v * (-14 * gamma - 8 * delta - 6 * delta * beta_p),
+            64 * v ** 3
+            - 8 * gamma ** 3 / 3
+            - 4 * gamma ** 2 * delta
+            - 9 * gamma * delta ** 2 / 2
+            - 8 * delta ** 3 / 3
+            + v ** 2 * (-24 * (5 * gamma + 2 * delta) - 72 * delta * beta_p)
+            + v
+            * (
+                87 * gamma ** 2 / 2
+                + 36 * gamma * delta
+                + 18 * delta ** 2
+                + (30 * gamma * delta + 51 * delta ** 2 / 2) * beta_p
+            ),
+            256 * v ** 4
+            + 1
+            / 24
+            * (
+                125 * gamma ** 4
+                + 200 * gamma ** 3 * delta
+                + 270 * gamma ** 2 * delta ** 2
+                + 256 * gamma * delta ** 3
+                + 125 * delta ** 4
+            )
+            + v ** 3 * (-64 * (13 * gamma + 4 * delta) - 576 * delta * beta_p)
+            + v ** 2
+            * (
+                48 * (13 * gamma ** 2 + 8 * gamma * delta + 3 * delta ** 2)
+                + 24 * delta * (26 * gamma + 17 * delta) * beta_p
+                + 72 * delta ** 2 * beta_p ** 2
+            )
+            + v
+            * (
+                1
+                / 3
+                * (
+                    -386 * gamma ** 3
+                    - 381 * gamma ** 2 * delta
+                    - 297 * gamma * delta ** 2
+                    - 128 * delta ** 3
+                )
+                + (
+                    -111 * gamma ** 2 * delta
+                    - 153 * gamma * delta ** 2
+                    - 86 * delta ** 3
+                )
+                * beta_p
+            ),
+        ]
+
+        return (
+            beta_p
+            * self.R[0] ** 2
             * sum(rho ** (k + 1) * coeffs[k] for k in range(order))
         )
 
